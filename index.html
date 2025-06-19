@@ -224,136 +224,185 @@
     </div>
 
     <script>
-        let deferredPrompt;
-        let isInstalled = false;
-        
-        // Check if app is already installed
-        function checkInstallStatus() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const isIOSStandalone = window.navigator.standalone === true;
-            isInstalled = isStandalone || isIOSStandalone;
-            
-            const installButton = document.getElementById('installButton');
-            const installStatus = document.getElementById('installStatus');
-            const installStatus2 = document.getElementById('installStatus2');
-            
-            if (isInstalled) {
-                installButton.textContent = '✅ App Installed';
-                installButton.disabled = true;
-                installStatus.textContent = 'App is already installed!';
-                installStatus.className = 'status success';
-                installStatus.classList.remove('hidden');
-                installStatus2.textContent = 'Installed';
-            } else {
-                installStatus2.textContent = 'Not Installed';
-            }
-        }
-        
-        // Detect platform
-        function detectPlatform() {
-            const platformInfo = document.getElementById('platformInfo');
-            const iosInstructions = document.getElementById('iosInstructions');
-            
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const isAndroid = /Android/.test(navigator.userAgent);
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-            
-            let platform = 'Desktop';
-            if (isIOS) platform = 'iOS';
-            else if (isAndroid) platform = 'Android';
-            else if (isMobile) platform = 'Mobile';
-            
-            platformInfo.textContent = platform;
-            
-            // Show iOS instructions if on iOS and not installed
-            if (isIOS && !isInstalled) {
-                iosInstructions.classList.remove('hidden');
-            }
-        }
-        
-        // Register service worker
-        async function registerServiceWorker() {
-            const swStatus = document.getElementById('swStatus');
-            
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('Service Worker registered:', registration);
-                    swStatus.textContent = 'Active';
-                    swStatus.style.color = '#059669';
-                } catch (error) {
-                    console.error('Service Worker registration failed:', error);
-                    swStatus.textContent = 'Failed';
-                    swStatus.style.color = '#dc2626';
-                }
-            } else {
-                swStatus.textContent = 'Not Supported';
-                swStatus.style.color = '#d97706';
-            }
-        }
-        
-        // Handle install prompt
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            const installButton = document.getElementById('installButton');
-            const installStatus = document.getElementById('installStatus');
-            
-            if (!isInstalled) {
-                installButton.style.display = 'inline-block';
-                installStatus.textContent = 'Ready to install!';
-                installStatus.className = 'status info';
-                installStatus.classList.remove('hidden');
-            }
-        });
-        
-        // Install button click handler
-        document.getElementById('installButton').addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                const installStatus = document.getElementById('installStatus');
-                installStatus.textContent = 'Installation not available. Try using the browser menu.';
-                installStatus.className = 'status warning';
-                installStatus.classList.remove('hidden');
-                return;
-            }
-            
-            const result = await deferredPrompt.prompt();
-            console.log('Install prompt result:', result);
-            
-            if (result.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            
-            deferredPrompt = null;
-        });
-        
-        // Handle successful installation
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('App was installed');
-            isInstalled = true;
-            checkInstallStatus();
-        });
-        
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', () => {
-            checkInstallStatus();
-            detectPlatform();
-            registerServiceWorker();
-        });
-    </script>
+// Enhanced PWA installation and redirect logic
+let deferredPrompt;
+let isInstalled = false;
 
-    <script>
-// Improved redirect logic for installed PWA
+// Check if app is already installed
+function checkInstallStatus() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSStandalone = window.navigator.standalone === true;
+    isInstalled = isStandalone || isIOSStandalone;
+    
+    const installButton = document.getElementById('installButton');
+    const installStatus = document.getElementById('installStatus');
+    const installStatus2 = document.getElementById('installStatus2');
+    
+    console.log('PWA Status:', {
+        isStandalone,
+        isIOSStandalone,
+        isInstalled,
+        userAgent: navigator.userAgent
+    });
+    
+    if (isInstalled) {
+        installButton.textContent = '✅ App Installed';
+        installButton.disabled = true;
+        installStatus.textContent = 'App is already installed!';
+        installStatus.className = 'status success';
+        installStatus.classList.remove('hidden');
+        installStatus2.textContent = 'Installed';
+        
+        // Redirect to main site if installed
+        redirectToMainSite();
+    } else {
+        installStatus2.textContent = 'Not Installed';
+    }
+}
+
+// Detect platform and show appropriate instructions
+function detectPlatform() {
+    const platformInfo = document.getElementById('platformInfo');
+    const iosInstructions = document.getElementById('iosInstructions');
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    
+    let platform = 'Desktop';
+    if (isIOS) platform = 'iOS';
+    else if (isAndroid) platform = 'Android';
+    else if (isMobile) platform = 'Mobile';
+    
+    platformInfo.textContent = platform;
+    
+    console.log('Platform detected:', platform);
+    
+    // Show iOS instructions if on iOS and not installed
+    if (isIOS && !isInstalled) {
+        iosInstructions.classList.remove('hidden');
+    }
+}
+
+// Register service worker with better error handling
+async function registerServiceWorker() {
+    const swStatus = document.getElementById('swStatus');
+    
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('Service Worker registered successfully:', registration);
+            swStatus.textContent = 'Active';
+            swStatus.style.color = '#059669';
+            
+            // Check for updates
+            registration.addEventListener('updatefound', () => {
+                console.log('Service Worker update found');
+            });
+            
+        } catch (error) {
+            console.error('Service Worker registration failed:', error);
+            swStatus.textContent = 'Failed: ' + error.message;
+            swStatus.style.color = '#dc2626';
+        }
+    } else {
+        console.log('Service Worker not supported');
+        swStatus.textContent = 'Not Supported';
+        swStatus.style.color = '#d97706';
+    }
+}
+
+// Handle install prompt with better debugging
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const installButton = document.getElementById('installButton');
+    const installStatus = document.getElementById('installStatus');
+    
+    if (!isInstalled) {
+        installButton.style.display = 'inline-block';
+        installButton.disabled = false;
+        installStatus.textContent = 'Ready to install! Click the button above.';
+        installStatus.className = 'status info';
+        installStatus.classList.remove('hidden');
+        console.log('Install prompt is ready');
+    }
+});
+
+// Install button click handler with better feedback
+document.getElementById('installButton').addEventListener('click', async () => {
+    console.log('Install button clicked');
+    
+    if (!deferredPrompt) {
+        const installStatus = document.getElementById('installStatus');
+        console.log('No deferred prompt available');
+        
+        // Check if we're on iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            installStatus.textContent = 'On iOS: Use Safari, tap Share button, then "Add to Home Screen"';
+        } else {
+            installStatus.textContent = 'Installation not available. Try using Chrome/Edge browser menu: "Install app" or "Add to Home Screen"';
+        }
+        installStatus.className = 'status warning';
+        installStatus.classList.remove('hidden');
+        return;
+    }
+    
+    try {
+        const result = await deferredPrompt.prompt();
+        console.log('Install prompt result:', result);
+        
+        const installStatus = document.getElementById('installStatus');
+        if (result.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+            installStatus.textContent = 'Installation started...';
+            installStatus.className = 'status success';
+        } else {
+            console.log('User dismissed the install prompt');
+            installStatus.textContent = 'Installation cancelled by user';
+            installStatus.className = 'status warning';
+        }
+        installStatus.classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Install prompt failed:', error);
+        const installStatus = document.getElementById('installStatus');
+        installStatus.textContent = 'Installation failed: ' + error.message;
+        installStatus.className = 'status warning';
+        installStatus.classList.remove('hidden');
+    }
+    
+    deferredPrompt = null;
+});
+
+// Handle successful installation
+window.addEventListener('appinstalled', (evt) => {
+    console.log('App was successfully installed');
+    isInstalled = true;
+    checkInstallStatus();
+    
+    // Show success message
+    const installStatus = document.getElementById('installStatus');
+    installStatus.textContent = 'App installed successfully! Opening...';
+    installStatus.className = 'status success';
+    installStatus.classList.remove('hidden');
+});
+
+// Redirect function for installed PWA
 function redirectToMainSite() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isIOSStandalone = window.navigator.standalone === true;
     const isInstalled = isStandalone || isIOSStandalone;
     
+    console.log('Checking redirect:', { isStandalone, isIOSStandalone, isInstalled });
+    
     if (isInstalled) {
-        // Show a brief loading message
+        console.log('App is installed, preparing redirect...');
+        
+        // Show loading screen
         document.body.innerHTML = `
             <div style="
                 display: flex;
@@ -386,26 +435,40 @@ function redirectToMainSite() {
             </div>
         `;
         
-        // Redirect after a short delay
+        // Redirect after delay
         setTimeout(() => {
+            console.log('Redirecting to https://humblemelody.com/');
             try {
                 window.location.href = 'https://humblemelody.com/';
             } catch (error) {
                 console.error('Redirect failed:', error);
-                // Fallback: try opening in new window
                 window.open('https://humblemelody.com/', '_blank');
             }
         }, 2000);
     }
 }
 
-// Run redirect check when page loads
-document.addEventListener('DOMContentLoaded', redirectToMainSite);
+// Initialize app with debugging
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing PWA...');
+    checkInstallStatus();
+    detectPlatform();
+    registerServiceWorker();
+    
+    // Debug PWA requirements
+    console.log('PWA Requirements Check:', {
+        https: location.protocol === 'https:',
+        serviceWorker: 'serviceWorker' in navigator,
+        manifest: document.querySelector('link[rel="manifest"]') !== null,
+        standalone: window.matchMedia('(display-mode: standalone)').matches
+    });
+});
 
-// Also check when the page becomes visible (for iOS)
+// Check visibility change for iOS
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-        redirectToMainSite();
+        console.log('Page became visible');
+        checkInstallStatus();
     }
 });
 </script>

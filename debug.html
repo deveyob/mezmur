@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Debug - Humble Melody</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4ade80;
+        }
+        .error { border-left-color: #ef4444; }
+        .warning { border-left-color: #f59e0b; }
+        .success { border-left-color: #10b981; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 PWA Debug Information</h1>
+    
+    <div class="debug-section">
+        <h3>Basic Requirements</h3>
+        <div id="requirements"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Manifest Status</h3>
+        <div id="manifest"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Service Worker Status</h3>
+        <div id="serviceworker"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Installation Status</h3>
+        <div id="installation"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Browser Information</h3>
+        <div id="browser"></div>
+    </div>
+
+    <script>
+        async function runDiagnostics() {
+            // Check basic requirements
+            const requirements = {
+                'HTTPS': location.protocol === 'https:' || location.hostname === 'localhost',
+                'Service Worker Support': 'serviceWorker' in navigator,
+                'Manifest Link': document.querySelector('link[rel="manifest"]') !== null,
+                'Fetch API': 'fetch' in window,
+                'Promise Support': 'Promise' in window
+            };
+            
+            let reqHtml = '';
+            for (const [key, value] of Object.entries(requirements)) {
+                const status = value ? '✅' : '❌';
+                const className = value ? 'success' : 'error';
+                reqHtml += `<div class="${className}">${status} ${key}</div>`;
+            }
+            document.getElementById('requirements').innerHTML = reqHtml;
+            
+            // Check manifest
+            try {
+                const response = await fetch('/manifest.json');
+                const manifest = await response.json();
+                document.getElementById('manifest').innerHTML = `
+                    <div class="success">✅ Manifest loaded successfully</div>
+                    <pre>${JSON.stringify(manifest, null, 2)}</pre>
+                `;
+            } catch (error) {
+                document.getElementById('manifest').innerHTML = `
+                    <div class="error">❌ Manifest failed to load: ${error.message}</div>
+                `;
+            }
+            
+            // Check service worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    document.getElementById('serviceworker').innerHTML = `
+                        <div class="success">✅ Service Worker registered</div>
+                        <div>Scope: ${registration.scope}</div>
+                        <div>State: ${registration.active ? registration.active.state : 'Not active'}</div>
+                    `;
+                } catch (error) {
+                    document.getElementById('serviceworker').innerHTML = `
+                        <div class="error">❌ Service Worker failed: ${error.message}</div>
+                    `;
+                }
+            } else {
+                document.getElementById('serviceworker').innerHTML = `
+                    <div class="error">❌ Service Worker not supported</div>
+                `;
+            }
+            
+            // Check installation
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const isIOSStandalone = window.navigator.standalone === true;
+            const isInstalled = isStandalone || isIOSStandalone;
+            
+            document.getElementById('installation').innerHTML = `
+                <div>Standalone mode: ${isStandalone ? '✅' : '❌'}</div>
+                <div>iOS Standalone: ${isIOSStandalone ? '✅' : '❌'}</div>
+                <div>Is Installed: ${isInstalled ? '✅' : '❌'}</div>
+                <div>Display mode: ${window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser'}</div>
+            `;
+            
+            // Browser info
+            document.getElementById('browser').innerHTML = `
+                <div>User Agent: ${navigator.userAgent}</div>
+                <div>Platform: ${navigator.platform}</div>
+                <div>Language: ${navigator.language}</div>
+                <div>Online: ${navigator.onLine ? '✅' : '❌'}</div>
+                <div>URL: ${window.location.href}</div>
+            `;
+        }
+        
+        runDiagnostics();
+    </script>
+</body>
+</html>
