@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Humble Melody</title>
+    <meta name="description" content="A Progressive Web App built with HTML">
+    <meta name="theme-color" content="#4ade80">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Humble Melody">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .install-section {
+            text-align: center;
+        }
+        
+        .install-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 10px;
+        }
+        
+        .install-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .install-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin: 1rem 0;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .status.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature h3 {
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+        
+        .feature p {
+            color: #6b7280;
+        }
+        
+        .ios-instructions {
+            background: #f3f4f6;
+            border-left: 4px solid #2563eb;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎵 Humble Melody</h1>
+            <p>Songs that hail the everlasting God</p>
+        </header>
+        
+        <div class="card">
+            <div class="install-section">
+                <h2>Install This App</h2>
+                <p>Get the full app experience by installing it on your device!</p>
+                
+                <div id="installStatus" class="status hidden"></div>
+                
+                <button id="installButton" class="install-button">
+                    📱 Install App
+                </button>
+                
+                <div id="iosInstructions" class="ios-instructions hidden">
+                    <strong>iOS Installation:</strong>
+                    <p>Tap the share button <span style="font-size: 1.2em;">⎋</span> and then "Add to Home Screen" <span style="font-size: 1.2em;">➕</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>App Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>Installable</h3>
+                    <p>Install directly to your home screen like a native app</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Loading</h3>
+                    <p>Optimized for quick loading and smooth performance</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Offline Ready</h3>
+                    <p>Works offline with cached content</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Push Notifications</h3>
+                    <p>Stay updated with important notifications</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>App Status</h2>
+            <div id="appStatus">
+                <p><strong>Service Worker:</strong> <span id="swStatus">Checking...</span></p>
+                <p><strong>Installation:</strong> <span id="installStatus2">Checking...</span></p>
+                <p><strong>Platform:</strong> <span id="platformInfo">Detecting...</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        let isInstalled = false;
+        
+        // Check if app is already installed
+        function checkInstallStatus() {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const isIOSStandalone = window.navigator.standalone === true;
+            isInstalled = isStandalone || isIOSStandalone;
+            
+            const installButton = document.getElementById('installButton');
+            const installStatus = document.getElementById('installStatus');
+            const installStatus2 = document.getElementById('installStatus2');
+            
+            if (isInstalled) {
+                installButton.textContent = '✅ App Installed';
+                installButton.disabled = true;
+                installStatus.textContent = 'App is already installed!';
+                installStatus.className = 'status success';
+                installStatus.classList.remove('hidden');
+                installStatus2.textContent = 'Installed';
+            } else {
+                installStatus2.textContent = 'Not Installed';
+            }
+        }
+        
+        // Detect platform
+        function detectPlatform() {
+            const platformInfo = document.getElementById('platformInfo');
+            const iosInstructions = document.getElementById('iosInstructions');
+            
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+            
+            let platform = 'Desktop';
+            if (isIOS) platform = 'iOS';
+            else if (isAndroid) platform = 'Android';
+            else if (isMobile) platform = 'Mobile';
+            
+            platformInfo.textContent = platform;
+            
+            // Show iOS instructions if on iOS and not installed
+            if (isIOS && !isInstalled) {
+                iosInstructions.classList.remove('hidden');
+            }
+        }
+        
+        // Register service worker
+        async function registerServiceWorker() {
+            const swStatus = document.getElementById('swStatus');
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('Service Worker registered:', registration);
+                    swStatus.textContent = 'Active';
+                    swStatus.style.color = '#059669';
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                    swStatus.textContent = 'Failed';
+                    swStatus.style.color = '#dc2626';
+                }
+            } else {
+                swStatus.textContent = 'Not Supported';
+                swStatus.style.color = '#d97706';
+            }
+        }
+        
+        // Handle install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const installButton = document.getElementById('installButton');
+            const installStatus = document.getElementById('installStatus');
+            
+            if (!isInstalled) {
+                installButton.style.display = 'inline-block';
+                installStatus.textContent = 'Ready to install!';
+                installStatus.className = 'status info';
+                installStatus.classList.remove('hidden');
+            }
+        });
+        
+        // Install button click handler
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                const installStatus = document.getElementById('installStatus');
+                installStatus.textContent = 'Installation not available. Try using the browser menu.';
+                installStatus.className = 'status warning';
+                installStatus.classList.remove('hidden');
+                return;
+            }
+            
+            const result = await deferredPrompt.prompt();
+            console.log('Install prompt result:', result);
+            
+            if (result.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+            
+            deferredPrompt = null;
+        });
+        
+        // Handle successful installation
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App was installed');
+            isInstalled = true;
+            checkInstallStatus();
+        });
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            checkInstallStatus();
+            detectPlatform();
+            registerServiceWorker();
+        });
+    </script>
+
+    <script>
+// Improved redirect logic for installed PWA
+function redirectToMainSite() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isIOSStandalone = window.navigator.standalone === true;
+    const isInstalled = isStandalone || isIOSStandalone;
+    
+    if (isInstalled) {
+        // Show a brief loading message
+        document.body.innerHTML = `
+            <div style="
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+                color: white;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                text-align: center;
+            ">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🎵</div>
+                <h1 style="font-size: 2rem; margin-bottom: 1rem;">Humble Melody</h1>
+                <p style="font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem;">Loading your music experience...</p>
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid rgba(255,255,255,0.3);
+                    border-top: 4px solid white;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                "></div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            </div>
+        `;
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+            try {
+                window.location.href = 'https://humblemelody.com/';
+            } catch (error) {
+                console.error('Redirect failed:', error);
+                // Fallback: try opening in new window
+                window.open('https://humblemelody.com/', '_blank');
+            }
+        }, 2000);
+    }
+}
+
+// Run redirect check when page loads
+document.addEventListener('DOMContentLoaded', redirectToMainSite);
+
+// Also check when the page becomes visible (for iOS)
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        redirectToMainSite();
+    }
+});
+</script>
+</body>
+</html>
